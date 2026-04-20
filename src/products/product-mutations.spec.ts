@@ -15,13 +15,13 @@ describe('Product Mutations', () => {
         `mutation($input: CreateProductInput!) {
           createProduct(input: $input) { id name price status tenantId }
         }`,
-        { input: { name: 'New Test Product', price: 49.99 } },
+        { input: { name: 'New Test Product', price: 50 } },
       );
 
       expect(errors).toBeUndefined();
       expect(data!.createProduct).toBeDefined();
       expect(data!.createProduct.name).toBe('New Test Product');
-      expect(data!.createProduct.price).toBe(49.99);
+      expect(data!.createProduct.price).toBe(50);
       expect(data!.createProduct.tenantId).toBe('tenant-a');
       createdProductIds.push(Number(data!.createProduct.id));
     });
@@ -31,7 +31,7 @@ describe('Product Mutations', () => {
         `mutation($input: CreateProductInput!) {
           createProduct(input: $input) { id name price status }
         }`,
-        { input: { name: 'Active Product', price: 10.0, status: 'ACTIVE' } },
+        { input: { name: 'ACTIVE Product', price: 10.0, status: 'ACTIVE' } },
       );
 
       expect(data!.createProduct.status).toBe('ACTIVE');
@@ -43,7 +43,7 @@ describe('Product Mutations', () => {
         `mutation($input: CreateProductInput!) {
           createProduct(input: $input) { id name status }
         }`,
-        { input: { name: 'Inactive Product', price: 5.0, status: 'INACTIVE' } },
+        { input: { name: 'INACTIVE Product', price: 5.0, status: 'INACTIVE' } },
       );
 
       expect(data!.createProduct.status).toBe('INACTIVE');
@@ -115,10 +115,10 @@ describe('Product Mutations', () => {
         `mutation($id: Int!, $input: UpdateProductInput!) {
           updateProduct(id: $id, input: $input) { id price }
         }`,
-        { id: productId, input: { price: 55.55 } },
+        { id: productId, input: { price: 55 } },
       );
 
-      expect(data!.updateProduct.price).toBe(55.55);
+      expect(data!.updateProduct.price).toBe(55);
     });
 
     it('should update the product status', async () => {

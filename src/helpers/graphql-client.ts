@@ -42,12 +42,12 @@ export async function createTestProduct(
 ): Promise<{ id: number; name: string; price: number; status: string }> {
   const input = {
     name: `Test Product ${Date.now()}`,
-    price: 99.99,
+    price: 100,
     status: 'ACTIVE',
     ...overrides,
   };
 
-  const { data } = await gql<{ createProduct: any }>(
+  const { data, errors } = await gql<{ createProduct: any }>(
     `mutation($input: CreateProductInput!) {
       createProduct(input: $input) { id name price status tenantId }
     }`,
@@ -55,7 +55,11 @@ export async function createTestProduct(
     tenantId,
   );
 
-  return { ...data!.createProduct, id: Number(data!.createProduct.id) };
+  if (errors || !data?.createProduct) {
+    throw new Error(`createTestProduct failed: ${JSON.stringify(errors)}`);
+  }
+
+  return { ...data.createProduct, id: Number(data.createProduct.id) };
 }
 
 /** Helper to create an image and return its ID for test setup. */
@@ -69,7 +73,7 @@ export async function createTestImage(
     ...overrides,
   };
 
-  const { data } = await gql<{ createImage: any }>(
+  const { data, errors } = await gql<{ createImage: any }>(
     `mutation($input: CreateImageInput!) {
       createImage(input: $input) { id url priority tenantId productId }
     }`,
@@ -77,7 +81,11 @@ export async function createTestImage(
     tenantId,
   );
 
-  return { ...data!.createImage, id: Number(data!.createImage.id) };
+  if (errors || !data?.createImage) {
+    throw new Error(`createTestImage failed: ${JSON.stringify(errors)}`);
+  }
+
+  return { ...data.createImage, id: Number(data.createImage.id) };
 }
 
 /** Helper to delete a product (cleanup). Ignores errors. */

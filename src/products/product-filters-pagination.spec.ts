@@ -156,12 +156,12 @@ describe('Product Filtering & Pagination', () => {
         `query($filter: ProductFilterInput) {
           products(filter: $filter, pageSize: 50) { id name status price }
         }`,
-        { filter: { status: 'ACTIVE', minPrice: 150.0 } },
+        { filter: { status: 'ACTIVE', minPrice: 150 } },
       );
 
       for (const product of data!.products) {
         expect(product.status).toBe('ACTIVE');
-        expect(product.price).toBeGreaterThanOrEqual(150.0);
+        expect(product.price).toBeGreaterThanOrEqual(150);
       }
     });
   });

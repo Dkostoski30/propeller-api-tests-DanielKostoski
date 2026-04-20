@@ -36,6 +36,9 @@ npm run test:watch
 
 # Run tests with coverage report
 npm run test:coverage
+
+# Run tests and generate HTML + JUnit reports (in reports/)
+npm run test:report
 ```
 
 ### Environment Variables
@@ -49,7 +52,9 @@ npm run test:coverage
 ```
 src/
 ├── helpers/
-│   └── graphql-client.ts                  # GraphQL client & test data helpers
+│   ├── graphql-client.ts                  # GraphQL client & test data helpers
+│   ├── global-setup.ts                    # Pre-test API health check
+│   └── test-data-factory.ts              # Builder pattern for test data creation
 ├── products/
 │   ├── product-queries.spec.ts            # Product list & single queries
 │   ├── product-mutations.spec.ts          # Create, update, delete products
@@ -57,6 +62,10 @@ src/
 ├── images/
 │   ├── image-queries.spec.ts              # Image list & single queries
 │   └── image-mutations.spec.ts            # Create, update, delete images
+├── validation/
+│   └── input-validation.spec.ts           # Boundary values, security, type coercion
+├── bugs/
+│   └── bug-verification.spec.ts           # Explicit bug reproduction & verification
 ├── tenant-isolation.spec.ts               # Multi-tenant data isolation
 └── relationships.spec.ts                  # Product-image relationships
 ```
@@ -67,9 +76,11 @@ src/
 - **Filtering** by status, name (case-insensitive partial match), and price range
 - **Pagination** correctness (page offset, page size, no missing results)
 - **Multi-tenant isolation** — verifying tenants cannot access each other's data via queries, mutations, or direct ID access
-- **Input validation** — invalid URLs, missing required fields, priority bounds
-- **Error handling** — non-existent resources, invalid operations
+- **Input validation** — boundary values, empty/whitespace strings, negative numbers, type coercion
+- **Security** — SQL injection, XSS payloads, javascript: protocol URLs
+- **Error handling** — non-existent resources, invalid operations, malformed GraphQL
 - **Relationships** — product-to-image (one-to-many) and image-to-product (many-to-one)
+- **Bug verification** — dedicated tests that prove each discovered bug exists and is fixed
 
 ## Bugs Discovered
 

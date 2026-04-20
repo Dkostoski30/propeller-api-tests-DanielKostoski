@@ -111,7 +111,7 @@ describe('Multi-Tenant Data Isolation', () => {
         `mutation($id: Int!, $input: UpdateProductInput!) {
           updateProduct(id: $id, input: $input) { id name }
         }`,
-        { id: tenantBProductId, input: { name: 'Hijacked by tenant-a' } },
+        { id: tenantBProductId, input: { name: 'Hijacked by tenant-a', price: 1.0 } },
         'tenant-a',
       );
 

@@ -34,7 +34,8 @@ jobs:
       # Check out the API repo to spin it up with Docker
       - uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/propeller-sdet-task-daniel-kostoski
+          repository: propeller-commerce/propeller-sdet-task-daniel-kostoski
+          token: ${{ secrets.API_REPO_TOKEN }}
           path: api
 
       - uses: actions/setup-node@v4
@@ -82,4 +83,4 @@ jobs:
       - name: Stop API
         if: always()
         working-directory: api
-        run: docker compose down -v
+        run: docker compose down -v || true

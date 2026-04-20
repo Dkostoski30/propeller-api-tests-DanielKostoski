@@ -93,10 +93,3 @@ The following bugs were found through the automated tests:
 3. **Pagination offset is wrong** (`product.service.ts`) — The offset calculation uses `page * pageSize` instead of `(page - 1) * pageSize`. With 1-indexed pages, page 1 skips the first `pageSize` records entirely.
 
 4. **Seed script uses non-existent method** (`seed.ts`) — `deleteAll()` does not exist on TypeORM repositories. The correct method is `delete({})`.
-
-## Assumptions
-
-- The API is running and reachable at `http://localhost:3000/graphql` before tests execute
-- The database has been seeded with the default sample data (tests also create their own test data for isolation)
-- Tests run sequentially (`--runInBand`) to avoid race conditions with shared data
-- GraphQL field `id` is returned as a string (GraphQL `ID` scalar) and converted to number where needed

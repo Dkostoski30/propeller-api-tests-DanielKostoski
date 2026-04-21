@@ -59,11 +59,13 @@ jobs:
               -H "x-tenant-id: health" \
               -d '{"query":"{ __typename }"}' > /dev/null 2>&1; then
               echo "API is ready!"
-              break
+              exit 0
             fi
             echo "Attempt $i/30 - waiting 5s..."
             sleep 5
           done
+          echo "API failed to start within 150s"
+          exit 1
 
       - name: Seed database
         working-directory: api

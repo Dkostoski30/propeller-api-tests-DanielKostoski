@@ -66,6 +66,10 @@ src/
 │   └── input-validation.spec.ts           # Boundary values, security, type coercion
 ├── bugs/
 │   └── bug-verification.spec.ts           # Explicit bug reproduction & verification
+├── schema/
+│   └── schema-contract.spec.ts            # GraphQL schema contract validation
+├── performance/
+│   └── response-time.spec.ts              # Response time threshold assertions
 ├── tenant-isolation.spec.ts               # Multi-tenant data isolation
 └── relationships.spec.ts                  # Product-image relationships
 ```
@@ -81,6 +85,8 @@ src/
 - **Error handling** — non-existent resources, invalid operations, malformed GraphQL
 - **Relationships** — product-to-image (one-to-many) and image-to-product (many-to-one)
 - **Bug verification** — dedicated tests that prove each discovered bug exists and is fixed
+- **Schema contract** — introspection-based tests that catch breaking API changes (fields, types, enums, operations)
+- **Performance gates** — response time assertions ensuring all endpoints respond within 2 seconds
 
 ## Bugs Discovered
 

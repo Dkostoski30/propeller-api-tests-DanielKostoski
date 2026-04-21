@@ -1,4 +1,4 @@
-import { gql, createTestProduct, deleteTestProduct } from '../helpers/graphql-client';
+import { gql, createTestProduct, createTestImage, deleteTestProduct, deleteTestImage } from '../helpers/graphql-client';
 
 describe('Bug Verification', () => {
   /**
@@ -210,6 +210,103 @@ describe('Bug Verification', () => {
       // Also verify no duplicates
       const uniqueIds = new Set(collectedIds);
       expect(uniqueIds.size).toBe(totalCount);
+    });
+  });
+
+  describe('BUG: Product price stored as integer truncates decimals', () => {
+    /**
+     * Expected: creating a product with price 29.99 should store and return 29.99.
+     * Actual (buggy): the price column uses type 'int' in the entity, so decimal
+     *                 values are truncated/rounded to the nearest integer.
+     *
+     * Root cause: product.entity.ts defines `@Column({ type: 'int' })` for price,
+     *             but the GraphQL schema exposes it as Float and the README says
+     *             "Product price (supports decimals)".
+     */
+
+    it('creating a product with price 29.99 should return 29.99, not a rounded integer', async () => {
+      const product = await createTestProduct('tenant-a', {
+        name: `Price Decimal Test ${Date.now()}`,
+        price: 29.99,
+      });
+
+      try {
+        expect(product.price).toBeCloseTo(29.99, 2);
+        expect(product.price).not.toBe(30);
+        expect(product.price).not.toBe(29);
+      } finally {
+        await deleteTestProduct(product.id);
+      }
+    });
+
+    it('product with price 0.01 should preserve the fractional part', async () => {
+      const product = await createTestProduct('tenant-a', {
+        name: `Tiny Price Test ${Date.now()}`,
+        price: 0.01,
+      });
+
+      try {
+        expect(product.price).toBeCloseTo(0.01, 2);
+        expect(product.price).not.toBe(0);
+      } finally {
+        await deleteTestProduct(product.id);
+      }
+    });
+
+    it('querying a product should return the original decimal price', async () => {
+      const product = await createTestProduct('tenant-a', {
+        name: `Price Query Test ${Date.now()}`,
+        price: 49.95,
+      });
+
+      try {
+        const { data } = await gql<{ product: any }>(
+          `query($id: Int!) { product(id: $id) { id price } }`,
+          { id: product.id },
+        );
+
+        expect(data!.product.price).toBeCloseTo(49.95, 2);
+      } finally {
+        await deleteTestProduct(product.id);
+      }
+    });
+  });
+
+  describe('BUG: Image priority validation inconsistent between create and update', () => {
+    /**
+     * Expected: priority validation should be identical for create and update.
+     *           Per README, valid range is 1-1000.
+     * Actual (buggy): create rejects priority <= 0 (correct), but update rejects
+     *                 priority < 0 (allows 0, which violates the 1-1000 range).
+     *
+     * Root cause: image.service.ts uses `priority <= 0` in create but `priority < 0`
+     *             in update — an off-by-one inconsistency.
+     */
+
+    let imageId: number;
+
+    beforeAll(async () => {
+      const image = await createTestImage('tenant-a', {
+        url: `https://cdn.example.com/priority-bug-${Date.now()}.jpg`,
+        priority: 100,
+      });
+      imageId = image.id;
+    });
+
+    afterAll(async () => {
+      await deleteTestImage(imageId);
+    });
+
+    it('updating image priority to 0 should be rejected (same as create)', async () => {
+      const { errors } = await gql(
+        `mutation($id: Int!, $input: UpdateImageInput!) {
+          updateImage(id: $id, input: $input) { id priority }
+        }`,
+        { id: imageId, input: { priority: 0 } },
+      );
+
+      // Priority 0 is rejected on create, so it should also be rejected on update
+      expect(errors).toBeDefined();
     });
   });
 });

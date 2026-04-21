@@ -71,7 +71,8 @@ src/
 ├── performance/
 │   └── response-time.spec.ts              # Response time threshold assertions
 ├── tenant-isolation.spec.ts               # Multi-tenant data isolation
-└── relationships.spec.ts                  # Product-image relationships
+├── relationships.spec.ts                  # Product-image relationships
+└── edge-cases.spec.ts                     # Missing header, cascade, pagination bounds, defaults
 ```
 
 ## What is Tested
@@ -99,3 +100,7 @@ The following bugs were found through the automated tests:
 3. **Pagination offset is wrong** (`product.service.ts`) — The offset calculation uses `page * pageSize` instead of `(page - 1) * pageSize`. With 1-indexed pages, page 1 skips the first `pageSize` records entirely.
 
 4. **Seed script uses non-existent method** (`seed.ts`) — `deleteAll()` does not exist on TypeORM repositories. The correct method is `delete({})`.
+
+5. **Product price stored as integer** (`product.entity.ts`) — The price column uses `@Column({ type: 'int' })` but the GraphQL schema exposes it as `Float` and the README states "supports decimals". Decimal prices like `29.99` are truncated to `30` in the database.
+
+6. **Image priority validation inconsistency** (`image.service.ts`) — Create rejects `priority <= 0` (correct per 1-1000 range) but update rejects `priority < 0` (allows 0, violating the documented range).

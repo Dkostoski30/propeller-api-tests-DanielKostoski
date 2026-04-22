@@ -19,23 +19,9 @@ price: number;
 
 ---
 
-### 2. Seed Script Uses Non-Existent Method
-**File:** `src/seed.ts` (lines 24-25)
-
-```typescript
-await imageRepo.deleteAll();
-await productRepo.deleteAll();
-```
-
-**Problem:** `.deleteAll()` doesn't exist in TypeORM. Script crashes with "deleteAll is not a function".
-
-**Fix:** Use `await imageRepo.delete({})` and `await productRepo.delete({})`.
-
----
-
 ## Medium Bugs
 
-### 3. Pagination Offset Calculation
+### 2. Pagination Offset Calculation
 **File:** `src/product/product.service.ts` (line 41)
 
 ```typescript
@@ -48,7 +34,7 @@ qb.skip(page * pageSize).take(pageSize);
 
 ---
 
-### 4. Priority Validation Inconsistency (Create vs Update)
+### 3. Priority Validation Inconsistency (Create vs Update)
 **File:** `src/image/image.service.ts` (line 47 vs line 72)
 
 ```typescript
@@ -65,7 +51,7 @@ if (input.priority !== undefined && (input.priority < 0 || input.priority > 1000
 
 ---
 
-### 5. Priority Error Message is Misleading
+### 4. Priority Error Message is Misleading
 **File:** `src/image/image.service.ts` (line 48)
 
 ```typescript
@@ -78,7 +64,7 @@ throw new BadRequestException('Priority must be between 0 and 1000');
 
 ---
 
-### 6. Image Create/Update Doesn't Validate ProductId
+### 5. Image Create/Update Doesn't Validate ProductId
 **File:** `src/image/image.service.ts` (lines 40-56, 58-80)
 
 **Problem:** When creating or updating an image with a `productId`, the service doesn't verify:
@@ -91,7 +77,7 @@ throw new BadRequestException('Priority must be between 0 and 1000');
 
 ---
 
-### 7. Page/PageSize Parameters Not Validated
+### 6. Page/PageSize Parameters Not Validated
 **File:** `src/product/product.service.ts` (line 41)
 
 **Problem:** No validation on `page` or `pageSize`. Passing `page: 0` or `page: -5` produces negative skip values. Passing `pageSize: 1000000` could cause performance issues.
@@ -100,7 +86,7 @@ throw new BadRequestException('Priority must be between 0 and 1000');
 
 ---
 
-### 8. MinPrice/MaxPrice Filters Silently Ignored When Negative
+### 7. MinPrice/MaxPrice Filters Silently Ignored When Negative
 **File:** `src/product/product.service.ts` (lines 33-39)
 
 ```typescript
@@ -115,7 +101,7 @@ if (filter?.minPrice !== undefined && filter?.minPrice >= 0) {
 
 ## Low Bugs
 
-### 9. Redundant Tenant Check + Wrong Error Message in Image findOne
+### 8. Redundant Tenant Check + Wrong Error Message in Image findOne
 **File:** `src/image/image.service.ts` (lines 22-34)
 
 ```typescript
@@ -133,7 +119,7 @@ if (image.tenantId !== tenantId) {  // Unreachable — already filtered above
 
 ---
 
-### 10. Product Name Regex Rejects Valid Characters
+### 9. Product Name Regex Rejects Valid Characters
 **File:** `src/product/product.service.ts` (line 68)
 
 ```typescript
@@ -153,15 +139,14 @@ if (!/^[a-zA-Z0-9\s\-_.,&'()]+$/.test(input.name.trim())) {
 | # | Bug | Severity | Already Tested? |
 |---|-----|----------|-----------------|
 | 1 | Price Float vs Int mismatch | CRITICAL | Partially (validation tests) |
-| 2 | Seed deleteAll() | CRITICAL | Not directly testable via API |
-| 3 | Pagination offset | MEDIUM | Yes (bug-verification.spec.ts) |
-| 4 | Priority create vs update inconsistency | MEDIUM | No |
-| 5 | Priority error message misleading | MEDIUM | No |
-| 6 | Image productId not validated | MEDIUM | No |
-| 7 | Page/pageSize not validated | MEDIUM | No |
-| 8 | Negative filter silently ignored | LOW | No |
-| 9 | Redundant tenant check + wrong message | LOW | No |
-| 10 | Name regex too restrictive | LOW | Partially (unicode test) |
+| 2 | Pagination offset | MEDIUM | Yes (bug-verification.spec.ts) |
+| 3 | Priority create vs update inconsistency | MEDIUM | No |
+| 4 | Priority error message misleading | MEDIUM | No |
+| 5 | Image productId not validated | MEDIUM | No |
+| 6 | Page/pageSize not validated | MEDIUM | No |
+| 7 | Negative filter silently ignored | LOW | No |
+| 8 | Redundant tenant check + wrong message | LOW | No |
+| 9 | Name regex too restrictive | LOW | Partially (unicode test) |
 
 ## Tests Still Needed
 
